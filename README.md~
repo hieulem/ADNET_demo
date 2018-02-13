@@ -1,9 +1,6 @@
 
-<img src='Test/lssd100.jpg' align="right" width=384 height = 300> 
-<img src='out/lssd100.jpg' align="right" width=384 height =300> 
+<img src='Test/lssd1005.jpg' width=200 height = 250> <img src='out/lssd1005.jpg'  width=200 height =250> 
 <br><br><br>
-
-
 
 
 
@@ -17,5 +14,7 @@ To run the code, please download our pre-trained model at: https://drive.google.
 If you use this code for your research, please cite:
 
 A+D-Net: Shadow Detection with Adversarial Shadow Attenuation
+
 Hieu Le, Tomas F. Yago Vicente, Vu Nguyen, Minh Hoai, Dimitris Samaras
+
 In arxiv, 2017
