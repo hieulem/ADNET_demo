@@ -73,13 +73,14 @@ def patches2tif(patches,w,h,step,size):
         
 
 opt = TestOptions().parse()
-opt.dataroot = './CROPPED/p200/'+str(opt.i)+'/'
+opt.root = '../penguin_data/'
+opt.dataroot = opt.root+'/CROPPED/p200/'+str(opt.i)+'/'
 opt.dataset_mode='tif'
 opt.fineSize = 256
 opt.model ='single_unet'
 opt.display_port = 9998
-opt.resdir = './results/'
-
+opt.resdir = opt.root+ '/results/'
+opt.checkpoints_dir = opt.root + '/checkpoints'
 opt.gpu_ids= [0]
 opt.which_epoch=115
 opt.step = 64
@@ -111,10 +112,10 @@ for i in range(0,s[0]):
         out[i,j,:,:,:] = temp['raw_out'][:,:,0]
 
 tt =  patches2tif(out,w,h,opt.step,opt.size)
-tt[tt>0] = 1
 plt.figure()
-plt.imshow(np.squeeze(-tt),cmap=plt.cm.Blues)
+colormap = plt.cm.viridis
+plt.imshow(np.squeeze(tt),colormap)
 plt.figure()
-plt.imshow(np.squeeze(-tif[4,:,:]),cmap=plt.cm.Blues)
+plt.imshow(np.squeeze(tif[4,:,:]),colormap)
 
 plt.show()
