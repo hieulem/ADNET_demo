@@ -1,0 +1,120 @@
+from models.models import create_model
+from data.tif_dataset import TifDataset
+import numpy as np
+from PIL import Image 
+from options.train_options import TrainOptions
+from options.test_options import TestOptions
+from util.visualizer import Visualizer
+import time
+from data.data_loader import CreateDataLoader
+import matplotlib.pyplot as plt
+import torch
+import os.path
+
+
+def totensor(A_img):
+    A_img = torch.from_numpy(A_img).float().div(255)
+    A_img = torch.unsqueeze(A_img,0)
+    return A_img
+
+def tif2patches(tif,step,size):
+    step = np.int32(step)
+    size=  np.int32(size)
+    print size
+    z,w,h = tif.shape
+    print w,h,z
+    ni = np.int32(np.floor((w- size)/step) +2)
+
+    nj = np.int32(np.floor((h- size)/step) +2)
+
+    print('ni:%d,nj:%d')%(ni,nj)
+    patches = np.zeros((ni,nj,z,size,size))
+    print patches.shape
+    for i in range(0,ni-1):
+        for j in range(0,nj-1):
+            patches[i,j,:,:,:] = tif[:,i*step:i*step+size,j*step:j*step+size]
+            #print i*step,i*step+size
+    for i in range(0,ni-1):
+        patches[i,nj-1,:,:,:] = tif[:,i*step:i*step+size,h-size:h]
+
+    for j in range(0,nj-1):
+        patches[ni-1,j,:,:,:] = tif[:,w-size:w,j*step:j*step+size]
+    patches[ni-1,nj-1,:,:,:] = tif[:,w-size:w,h-size:h]
+    return patches
+
+def patches2tif(patches,w,h,step,size):
+    tif = np.zeros((1,w,h))
+    ws = np.zeros((1,w,h))
+    
+    ni = np.int32(np.floor((w- size)/step) +2)
+
+    nj = np.int32(np.floor((h- size)/step) +2)
+    
+    for i in range(0,ni-1):
+        for j in range(0,nj-1):
+            tif[:,i*step:i*step+size,j*step:j*step+size]=  tif[:,i*step:i*step+size,j*step:j*step+size]+ patches[i,j,:,:,:]
+            ws[:,i*step:i*step+size,j*step:j*step+size]=  ws[:,i*step:i*step+size,j*step:j*step+size]+ 1
+           
+    for i in range(0,ni-1):
+        tif[:,i*step:i*step+size,h-size:h] =  tif[:,i*step:i*step+size,h-size:h]+ patches[i,nj-1,:,:,:] 
+        ws[:,i*step:i*step+size,h-size:h] =  ws[:,i*step:i*step+size,h-size:h]+ 1
+
+    for j in range(0,nj-1):
+        tif[:,w-size:w,j*step:j*step+size]= tif[:,w-size:w,j*step:j*step+size]+ patches[ni-1,j,:,:,:]
+        ws[:,w-size:w,j*step:j*step+size]= ws[:,w-size:w,j*step:j*step+size]+ 1
+   
+    tif[:,w-size:w,h-size:h] = tif[:,w-size:w,h-size:h]+ patches[ni-1,nj-1]
+    ws[:,w-size:w,h-size:h] = ws[:,w-size:w,h-size:h]+ 1
+    
+    tif = np.divide(tif,ws)
+
+
+    return tif
+        
+
+opt = TestOptions().parse()
+opt.dataroot = './CROPPED/p200/'+str(opt.i)+'/'
+opt.dataset_mode='tif'
+opt.fineSize = 256
+opt.model ='single_unet'
+opt.display_port = 9998
+opt.resdir = './results/'
+
+opt.gpu_ids= [0]
+opt.which_epoch=115
+opt.step = 64
+opt.size = 256
+
+
+imlist=[]
+for root,_,fnames in sorted(os.walk(opt.dataroot)):
+    for fname in fnames:
+        if fname.endswith('.npy'):
+            path = os.path.join(root,fname)
+            imlist.append(path)
+print imlist
+
+tif = np.load(imlist[0]).astype(np.uint8)
+z,w,h = tif.shape
+dd = tif2patches(np.copy(tif),opt.step,opt.size)
+model = create_model(opt)
+s = np.asarray(dd.shape)
+print s
+s[2]=1
+out = np.zeros(s)
+print out.shape
+for i in range(0,s[0]):
+    for j in range(0,s[1]):
+        t = dd[i,j,:,:,:]
+        input = totensor(t)
+        temp = model.get_prediction(input)
+        out[i,j,:,:,:] = temp['raw_out'][:,:,0]
+
+tt =  patches2tif(out,w,h,opt.step,opt.size)
+tt[tt>0.01] = 1
+plt.figure()
+plt.imshow(np.squeeze(-tt),cmap=plt.cm.Blues)
+plt.figure()
+plt.imshow(np.squeeze(-tif[4,:,:]),cmap=plt.cm.Blues)
+
+plt.show()
