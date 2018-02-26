@@ -4,13 +4,37 @@ import numpy as np
 from PIL import Image 
 from options.train_options import TrainOptions
 from options.test_options import TestOptions
-from util.visualizer import Visualizer
 import time
 from data.data_loader import CreateDataLoader
+import matplotlib
+matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 import torch
 import os.path
 
+def makedirifnotexist(d):
+    if not os.path.isdir(d):
+        os.makedirs(d)
+
+
+opt = TestOptions().parse()
+opt.root = '/gpfs/projects/LynchGroup/CROZtrain/'
+opt.dataset_mode='tif'
+opt.fineSize = 256
+opt.model ='single_unet'
+opt.display_port = 9998
+opt.resdir = opt.root+'/results/'+opt.name+'/'
+opt.visdir = opt.root+'/vis/'+opt.name+'/'
+opt.checkpoints_dir = opt.root + '/checkpoints'
+opt.gpu_ids= [0]
+opt.step = 64
+opt.size = 256
+   
+print(opt.resdir)
+print(opt.root)
+makedirifnotexist(opt.resdir)
+makedirifnotexist(opt.visdir)
 
 def totensor(A_img):
     A_img = torch.from_numpy(A_img).float().div(255)
@@ -20,16 +44,12 @@ def totensor(A_img):
 def tif2patches(tif,step,size):
     step = np.int32(step)
     size=  np.int32(size)
-    print size
     z,w,h = tif.shape
-    print w,h,z
     ni = np.int32(np.floor((w- size)/step) +2)
 
     nj = np.int32(np.floor((h- size)/step) +2)
 
-    print('ni:%d,nj:%d')%(ni,nj)
     patches = np.zeros((ni,nj,z,size,size))
-    print patches.shape
     for i in range(0,ni-1):
         for j in range(0,nj-1):
             patches[i,j,:,:,:] = tif[:,i*step:i*step+size,j*step:j*step+size]
@@ -72,50 +92,43 @@ def patches2tif(patches,w,h,step,size):
     return tif
         
 
-opt = TestOptions().parse()
-opt.root = '../penguin_data/'
-opt.dataroot = opt.root+'/CROPPED/p200/'+str(opt.i)+'/'
-opt.dataset_mode='tif'
-opt.fineSize = 256
-opt.model ='single_unet'
-opt.display_port = 9998
-opt.resdir = opt.root+ '/results/'
-opt.checkpoints_dir = opt.root + '/checkpoints'
-opt.gpu_ids= [0]
-opt.which_epoch=115
-opt.step = 64
-opt.size = 256
-
-
-imlist=[]
-for root,_,fnames in sorted(os.walk(opt.dataroot)):
-    for fname in fnames:
-        if fname.endswith('.npy'):
-            path = os.path.join(root,fname)
-            imlist.append(path)
-print imlist
-
-tif = np.load(imlist[0]).astype(np.uint8)
-z,w,h = tif.shape
-dd = tif2patches(np.copy(tif),opt.step,opt.size)
 model = create_model(opt)
-s = np.asarray(dd.shape)
-print s
-s[2]=1
-out = np.zeros(s)
-print out.shape
-for i in range(0,s[0]):
-    for j in range(0,s[1]):
-        t = dd[i,j,:,:,:]
-        input = totensor(t)
-        temp = model.get_prediction(input)
-        out[i,j,:,:,:] = temp['raw_out'][:,:,0]
+for k in range(0,13):
 
-tt =  patches2tif(out,w,h,opt.step,opt.size)
-plt.figure()
-colormap = plt.cm.viridis
-plt.imshow(np.squeeze(tt),colormap)
-plt.figure()
-plt.imshow(np.squeeze(tif[4,:,:]),colormap)
+    opt.dataroot = opt.root+'/CROPPED/p1000/'+str(k)+'/'
+    imlist=[]
+    imnamelist=[]
+    for root,_,fnames in sorted(os.walk(opt.dataroot)):
+        for fname in fnames:
+            if fname.endswith('.npy'):
+                path = os.path.join(root,fname)
+                imlist.append(path)
+                imnamelist.append(fname)
+    print(imlist)
 
-plt.show()
+    tif = np.load(imlist[0]).astype(np.uint8)
+    z,w,h = tif.shape
+    dd = tif2patches(np.copy(tif),opt.step,opt.size)
+    s = np.asarray(dd.shape)
+    print(s)
+    s[2]=1
+    out = np.zeros(s)
+    print(out.shape)
+    for i in range(0,s[0]):
+        for j in range(0,s[1]):
+            t = dd[i,j,:,:,:]
+            input = totensor(t)
+            temp = model.get_prediction(input)
+            out[i,j,:,:,:] = temp['raw_out'][:,:,0]
+
+    tt =  patches2tif(out,w,h,opt.step,opt.size)
+    fi1 = plt.figure()
+    colormap = plt.cm.viridis
+    plt.imshow(np.squeeze(tt),colormap)
+    plt.axis('off')
+    fi1.savefig(opt.visdir+imnamelist[0]+'_pred.png',bbox_inches='tight',pad_inches=0,dpi=1000)
+    fi2 = plt.figure()
+    plt.imshow(np.squeeze(tif[4,:,:]),colormap)
+    plt.axis('off')
+    fi2.savefig(opt.visdir+imnamelist[0]+'_ori.png',bbox_inches='tight',pad_inches=0,dpi=1000)
+    plt.show()

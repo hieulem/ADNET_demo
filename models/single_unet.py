@@ -19,7 +19,7 @@ class UnetModel(BaseModel):
         # load/define networks
         self.netG = networks.define_G(8, 1, 64,
                                       'unet_256', opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
-        
+        self.criterionL1 = torch.nn.L1Loss()        
         if self.isTrain:
             self.old_lr = opt.lr
             # define loss functions
