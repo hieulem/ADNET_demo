@@ -24,7 +24,8 @@ class TifDataset(BaseDataset):
                     self.imlist.append(path)
                     self.imname.append(fname)
         self.tifimg = np.load(self.imlist[0]).astype(np.uint8)
-        
+         
+        self.tifimg = np.mean(self.tifimg,axis=0,keepdims=True)
         
         GTmask = np.asarray(Image.open(os.path.join(self.GTroot,self.imname[0][:-4]+'.png')))
         self.GTmask = np.zeros((1,GTmask.shape[0],GTmask.shape[1]),dtype=np.uint8)
@@ -40,7 +41,6 @@ class TifDataset(BaseDataset):
     
     def getpatch(self,i,j):
         A_img = self.tifimg[:,i*256:(i+1)*256,j*256:(j+1)*256]
-
         B_img = self.GTmask[:,i*256:(i+1)*256,j*256:(j+1)*256]
         A_img = torch.from_numpy(A_img).float().div(255)
         B_img = torch.from_numpy(B_img).float().div(255)

@@ -17,6 +17,15 @@ def makedirifnotexist(d):
     if not os.path.isdir(d):
         os.makedirs(d)
 
+def full_frame(width=None, height=None):
+    matplotlib.rcParams['savefig.pad_inches'] = 0
+    figsize = None if width is None else (width, height)
+    fig = plt.figure(figsize=figsize)
+    ax = plt.axes([0,0,1,1], frameon=False)
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    plt.autoscale(tight=True)
+    return fig
 
 opt = TestOptions().parse()
 opt.root = '/gpfs/projects/LynchGroup/CROZtrain/'
@@ -122,12 +131,14 @@ for k in range(0,13):
             out[i,j,:,:,:] = temp['raw_out'][:,:,0]
 
     tt =  patches2tif(out,w,h,opt.step,opt.size)
-    fi1 = plt.figure()
+    #fi1 = plt.figure(1)
+    fi1 = full_frame()
     colormap = plt.cm.viridis
     plt.imshow(np.squeeze(tt),colormap)
     plt.axis('off')
     fi1.savefig(opt.visdir+imnamelist[0]+'_pred.png',bbox_inches='tight',pad_inches=0,dpi=1000)
-    fi2 = plt.figure()
+    #fi2 = plt.figure(2)
+    fi2 = full_frame()
     plt.imshow(np.squeeze(tif[4,:,:]),colormap)
     plt.axis('off')
     fi2.savefig(opt.visdir+imnamelist[0]+'_ori.png',bbox_inches='tight',pad_inches=0,dpi=1000)
