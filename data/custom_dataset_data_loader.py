@@ -16,6 +16,9 @@ def CreateDataset(opt):
     elif opt.dataset_mode == 'tif':
         from data.tif_dataset import TifDataset
         dataset = TifDataset(opt)
+    elif opt.dataset_mode == 'png':
+        from data.png_dataset import PngDataset
+        dataset = PngDataset(opt)
     else:
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 

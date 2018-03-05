@@ -1,5 +1,5 @@
 from models.models import create_model
-from data.tif_dataset import TifDataset
+from data.png_dataset import PngDataset
 import numpy as np
 from PIL import Image 
 from options.train_options import TrainOptions

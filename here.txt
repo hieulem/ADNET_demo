@@ -1,0 +1,6 @@
+/nfs/bigbox/hieule/p1000/checkpoints/p1000_3dataset
+CustomDatasetDataLoader
+dataset [PNGDATASET] was created
+single_unet
+initialization method [normal]
+model [UnetModel] was created

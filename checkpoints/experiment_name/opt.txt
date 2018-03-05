@@ -10,7 +10,7 @@ display_winsize: 256
 fineSize: 256
 gpu_ids: [0]
 how_many: 50
-i: 14
+i: 0
 init_type: normal
 input_nc: 3
 isTrain: False

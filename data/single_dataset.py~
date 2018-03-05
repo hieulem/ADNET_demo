@@ -13,6 +13,7 @@ class SingleDataset(BaseDataset):
         self.A_paths,self.imname = make_dataset(self.dir_A)
         
         self.A_paths = sorted(self.A_paths)
+        self.imname = sorted(self.imname)
         transform_list = [transforms.ToTensor(),
                             transforms.Normalize((0.5,0.5,0.5),
                                                  (0.5,0.5,0.5))]
