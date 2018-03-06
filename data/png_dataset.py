@@ -1,6 +1,5 @@
 import os.path
 
-import torchvision.transforms as transforms
 from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
@@ -30,20 +29,9 @@ class PngDataset(BaseDataset):
                     self.imname.append(fname)
 
         self.nim = len(self.imname)
-        #self.tifimg = np.load(self.imlist[0]).astype(np.uint8)
-         
-
-        #self.tifimg = np.mean(self.tifimg,axis=0,keepdims=True)
-        
-        #GTmask = np.asarray(Image.open(os.path.join(self.GTroot,self.imname[0][:-4]+'.png')))
-        #self.GTmask = np.zeros((1,GTmask.shape[0],GTmask.shape[1]),dtype=np.uint8)
-        #self.GTmask[0] = GTmask.astype(np.uint8)
-        #z,w,h = self.tifimg.shape
-        #self.nx=np.floor(w/256).astype(np.uint8)
-        #self.ny=np.floor(h/256).astype(np.uint8)
     
     def __len__(self):
-        return 10000
+        return self.nim
     def name(self):
         return 'PNGDATASET'
     
