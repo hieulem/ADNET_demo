@@ -25,7 +25,6 @@ class TifDataset(BaseDataset):
                     self.imname.append(fname)
         self.tifimg = np.load(self.imlist[0]).astype(np.uint8)
          
-        self.tifimg = np.mean(self.tifimg,axis=0,keepdims=True)
         
         GTmask = np.asarray(Image.open(os.path.join(self.GTroot,self.imname[0][:-4]+'.png')))
         self.GTmask = np.zeros((1,GTmask.shape[0],GTmask.shape[1]),dtype=np.uint8)

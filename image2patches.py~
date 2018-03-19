@@ -39,6 +39,8 @@ sdmkdir(opt.patch_fold_res)
 sdmkdir(opt.im_res)
 imlist=[]
 imnamelist=[]
+print(opt)
+print A_fold
 opt.no_dropout = True
 model = create_model(opt)
 print(model)
@@ -52,7 +54,9 @@ for root,_,fnames in sorted(os.walk(A_fold)):
             imnamelist.append(fname)
 for im_path,mask_path,imname in  imlist:
     png = misc.imread(im_path,mode='RGB')
+    #mask = misc.imread(mask_path,mode='L')
     w,h,z = png.shape
+    
 #    savepatch_test(png,w,h,opt.step,opt.size,opt.patch_fold_A+'/'+imname)
     #savepatch_train(png,mask,w,h,opt.step,opt.size,opt.patch_fold_A+'/'+imname,opt.patch_fold_B+'/'+imname)
 '''

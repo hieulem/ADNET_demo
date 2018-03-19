@@ -9,6 +9,8 @@ from pdb import set_trace as st
 import random
 import numpy as np
 import time
+from scipy import misc
+
 class PngDataset(BaseDataset):
     def __init__(self, opt):
         self.opt = opt
@@ -16,22 +18,24 @@ class PngDataset(BaseDataset):
         self.GTroot = opt.dataroot
         self.A_dir = opt.dataroot + '/A/'
         self.B_dir = opt.dataroot + '/B/'
-        self.A_path = []
-        self.B_path = []
         self.imname = []
+        self.imname_pos = []
         for root,_,fnames in sorted(os.walk(self.A_dir)):
             for fname in fnames:
                 if fname.endswith('.png'):
                     path = os.path.join(root,fname)
-                    self.A_path.append(path)
-
-                    self.B_path.append(os.path.join(self.B_dir,fname))
                     self.imname.append(fname)
-
+        
+        for root,_,fnames in sorted(os.walk(self.B_dir)):
+            for fname in fnames:
+                if fname.endswith('.png'):
+                    path = os.path.join(root,fname)
+                    self.imname_pos.append(fname)
         self.nim = len(self.imname)
-    
+
     def __len__(self):
-        return self.nim
+        return 10000
+        #return self.nim
     def name(self):
         return 'PNGDATASET'
     
@@ -47,13 +51,25 @@ class PngDataset(BaseDataset):
     def get_number_of_patches(self,idx):
         return self.nx,self.ny
     def __getitem__(self,index):
-        r_index = index % self.nim
-        A_img = np.asarray(Image.open(self.A_path[r_index]))
-        B_img = np.asarray(Image.open(self.B_path[r_index]))
-        
+        if random.random() < self.opt.biased_sampling:
+            r_index = index % len(self.imname_pos)
+            imname = self.imname_pos[r_index]
+            A_img = np.asarray(Image.open(os.path.join(self.A_dir,imname)))
+            B_img = np.asarray(Image.open(os.path.join(self.B_dir,imname)))
+        else:
+            
+            r_index = index % len(self.imname)
+            imname = self.imname[r_index]
+            A_img = np.asarray(Image.open(os.path.join(self.A_dir,imname)))
+            
+            if imname in self.imname_pos:
+                B_img = np.asarray(Image.open(os.path.join(self.B_dir,imname)))
+            else:
+                t = A_img.shape
+                
+                B_img = np.zeros((A_img.shape[0],A_img.shape[1]))
         
         A_img = np.transpose(A_img,(2,0,1))
-        imname = self.imname[r_index]
         B_img = np.expand_dims(B_img, axis=0)
         z,w,h = A_img.shape
         w_offset = random.randint(0,max(0,w-self.opt.fineSize-1))
@@ -62,4 +78,6 @@ class PngDataset(BaseDataset):
         B_img = B_img[:,w_offset:w_offset + self.opt.fineSize, h_offset:h_offset + self.opt.fineSize]
         A_img = torch.from_numpy(A_img).float().div(255)
         B_img = torch.from_numpy(B_img).float().div(255)
+        A_img = A_img - 0.5
+        A_img = A_img * 2
         return  {'A': A_img, 'B': B_img}

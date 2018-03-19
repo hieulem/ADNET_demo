@@ -76,7 +76,7 @@ def visAB(root,name):
     vis = root + '/vis/'+name+'/'
     visdir(A,B,vis)
 def visABC(root,name):
-    print('Visulizing:' + name)
+    print('Visulizing: %s',name)
     A = root + '/A/'
     B = root + '/B/'
     res = root + '/res/' + name +'/'
@@ -87,4 +87,4 @@ root = '/gpfs/projects/LynchGroup/Train_all/CROZtrain/CROPPED/p1000/'
 #root ='/gpfs/projects/LynchGroup/Train_all/CROPPED/p1000/'
 #root ='/nfs/bigbox/hieule/p1000/testing/PAUL/'
 root ='/nfs/bigbox/hieule/p1000/testing/CROZ/'
-visABC(root,'RGB0.5')
+visABC(root,'no_bias')

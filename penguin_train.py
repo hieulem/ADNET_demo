@@ -6,9 +6,14 @@ from options.train_options import TrainOptions
 import time
 from data.data_loader import CreateDataLoader
 
+
+from util.visualizer import Visualizer
+
 opt = TrainOptions().parse()
 opt.model ='single_unet'
 
+visualizer = Visualizer(opt)
+total_steps = 0
 data_loader = CreateDataLoader(opt)
 #dataset = TifDataset(opt)
 dataset = data_loader.load_data()
@@ -27,7 +32,8 @@ for epoch in range(opt.epoch_count,opt.niter+opt.niter_decay+1):
         print('epoch:%d, i: %d'%(epoch,i))
         model.set_input(data)
         model.optimize_parameters()
-    
+        if i% 5 ==0:
+            visualizer.display_current_results(model.get_current_visuals(), epoch, False)
     print('End of epoch %d / %d \t Time Taken: %d sec' %
                         (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
     if epoch % 5 ==0:

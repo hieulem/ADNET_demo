@@ -8,7 +8,6 @@ import torch
 from pdb import set_trace as st
 import random
 import numpy as np
-from scipy import signal
 import time
 class TwodirsDataset(BaseDataset):
     def initialize(self, opt):
@@ -48,31 +47,19 @@ class TwodirsDataset(BaseDataset):
 
         # print('(A, B) = (%d, %d)' % (index_A, index_B))
         A_img = Image.open(A_path).convert('RGB')
+        ow = A_img.size[0]
+        oh = A_img.size[1]
         w = np.float(A_img.size[0])
         h = np.float(A_img.size[1])
         if os.path.isfile(B_path): 
             B_img = Image.open(B_path)
         else:
             B_img = Image.fromarray(np.zeros((int(w),int(h)),dtype = np.uint8),mode='L')
-        #print B_img.size()
-        if self.opt.useshadowbd:
-            grad1 = signal.convolve2d(np.asarray(B_img).astype(np.float),[[1,1],[-1,-1]],boundary='symm',mode ='same')
-            grad2 = signal.convolve2d(np.asarray(B_img),[[-1,1],[-1,1]],boundary='symm',mode ='same')
-            grad1[grad1!=0]= 255
-            grad2[grad2!=0]=255
-            grad3 = grad1+grad2
-            shadow_boundary = signal.convolve2d(grad3,[[1,1,1],[1,1,1],[1,1,1]],boundary='symm',mode= 'same')
-            shadow_boundary[shadow_boundary!=0] = 255
-            shadow_boundary = Image.fromarray(shadow_boundary.astype(np.uint8))
-   #     time.sleep(5)
-    
-
-
-      #print A_path
-        #print imname
-        #print B_path
+        
+        
         if self.opt.randomSize:
             self.opt.loadSize = np.random.randint(257,300,1)[0]
+        
         if self.opt.keep_ratio:
             if w>h:
                 ratio = np.float(self.opt.loadSize)/np.float(h)
@@ -97,10 +84,11 @@ class TwodirsDataset(BaseDataset):
         
         w = A_img.size[0]
         h = A_img.size[1]
-        if not self.opt.not_use_log and not self.opt.use_log_01:
+        if self.opt.log_scale>0:
             A_img = np.asarray(A_img).astype(np.double) + 1
+            A_img = A_img*(float(self.opt.log_scale)/256)
             A_img = np.log(A_img)
-            A_img = (A_img-np.log(1))/(np.log(256) - np.log(1)) *255
+            A_img = (A_img)/(np.log(self.opt.log_scale)) *255
 
         A_img = self.transformA(A_img)
         B_img = self.transformB(B_img)
@@ -108,8 +96,6 @@ class TwodirsDataset(BaseDataset):
 
         #print shadow_boundary
         #shadow_boundary.show()
-        if self.opt.useshadowbd:
-            shadow_boundary = self.transformB(shadow_boundary)
 
         if not self.opt.no_crop:        
             w_offset = random.randint(0,max(0,w-self.opt.fineSize-1))
@@ -122,6 +108,7 @@ class TwodirsDataset(BaseDataset):
                 shadow_boundary = shadow_boundary[:, h_offset:h_offset + self.opt.fineSize, w_offset:w_offset + self.opt.fineSize]      
         
         if (not self.opt.no_flip) and random.random() < 0.5:
+            print 'asd'
             idx = [i for i in range(A_img.size(2) - 1, -1, -1)]
             idx = torch.LongTensor(idx)
             A_img = A_img.index_select(2, idx)
@@ -132,7 +119,7 @@ class TwodirsDataset(BaseDataset):
             return {'A': A_img, 'B': B_img,'sdbr': shadow_boundary,
                 'A_paths': A_path, 'B_paths': B_path,'imname':imname}
         return {'A': A_img, 'B': B_img,
-                'A_paths': A_path, 'B_paths': B_path,'imname':imname}
+                'A_paths': A_path, 'B_paths': B_path,'imname':imname,'w':ow,'h':oh}
 
 
     def __len__(self):
