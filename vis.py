@@ -4,6 +4,9 @@ from scipy import misc
 import os 
 from m_util import sdmkdir,to_rgb3b
 from sklearn import metrics
+import rasterio
+from rasterio import mask, features, warp
+
 def show_heatmap_on_image(img,mask):
     
     #mask = np.float32(mask)/np.max(mask)
@@ -83,10 +86,41 @@ def visAB(root,name):
     vis = root + '/vis/'+name+'/'
     visdir(A,B,vis)
 def visABC(root,name):
-    print('Visulizing:' + name)
+    print('Visualizing:' + name)
     A = root + '/A/'
     B = root + '/B/'
     res = root + '/res/' + name +'/'
     vis = root + '/vis_all/'+name+'/'
     visdir2(A,B,res,vis)
 
+
+def visTIF(root,name):
+
+    print('Visualizing:' + name)
+    A = root + '/A/'
+    B = root + '/B/'
+    tif = root + '/tif/'
+    res = root + '/res/' + name +'/'
+    tifres = root + '/tifres/'+name+'/'
+    sdmkdir(tifres)
+
+    imlist=[]
+    imnamelist=[]
+    for root,_,fnames in sorted(os.walk(tif)):
+        for fname in fnames:
+            if fname.endswith('.png'):
+                pathA = os.path.join(tif,fname)
+                pathGT = os.path.join(B,fname)
+                pathmask = os.path.join(res,fname)
+                imlist.append((pathA,pathGT,pathmask,fname))
+                imnamelist.append(fname)
+    print imnamelist
+    for pathA,pathB,pathmask,fname in imlist:
+        GT = misc.imread(pathB)
+        mask = misc.imread(pathmask)
+        tifim = rasterio.open(pathA)
+        outmeta = tifim.meta.copy()
+        outmeta.update({"count":outmeta.count+2})
+        X = rasterio.read()
+        print X.shape()
+        
