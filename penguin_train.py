@@ -10,7 +10,6 @@ from data.data_loader import CreateDataLoader
 from util.visualizer import Visualizer
 
 opt = TrainOptions().parse()
-opt.model ='single_unet'
 
 visualizer = Visualizer(opt)
 total_steps = 0

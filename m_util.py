@@ -153,6 +153,36 @@ def savepatch_test(png,w,h,step,size,basename):
         misc.toimage(png[w-size:w,j*step:j*step+size,:]).save(basename+format(ni-1,'03d')+'_'+format(j,'03d')+'.png')
     misc.toimage(png[w-size:w,h-size:h,:]).save(basename+format(ni-1,'03d')+'_'+format(nj-1,'03d')+'.png')
 
+
+def savepatch_test_with_mask(png,mask,w,h,step,size,imbasename,patchbasename):
+
+    ni = np.int32(np.floor((w- size)/step) +2)
+    nj = np.int32(np.floor((h- size)/step) +2)
+
+    for i in range(0,ni-1):
+        for j in range(0,nj-1):
+            name = format(i,'03d')+'_'+format(j,'03d')+'.png'
+            m = mask[i*step:i*step+size,j*step:j*step+size]
+            misc.toimage(m,mode='L').save(patchbasename+name)
+            misc.toimage(png[i*step:i*step+size,j*step:j*step+size,:]).save(imbasename+name)
+    for i in range(0,ni-1):
+        
+        name = format(i,'03d')+'_'+format(nj-1,'03d')+'.png'
+        m = mask[i*step:i*step+size,h-size:h]
+        misc.toimage(m,mode='L').save(patchbasename+name)
+        misc.toimage(png[i*step:i*step+size,h-size:h,:]).save(imbasename+format(i,'03d')+'_'+format(nj-1,'03d')+'.png')
+
+
+    for j in range(0,nj-1):
+        name = format(ni-1,'03d')+'_'+format(j,'03d')+'.png'
+        m = mask[w-size:w,j*step:j*step+size]
+        misc.toimage(m,mode='L').save(patchbasename+name)
+        misc.toimage(png[w-size:w,j*step:j*step+size,:]).save(imbasename+format(ni-1,'03d')+'_'+format(j,'03d')+'.png')
+    
+    m= mask[w-size:w,h-size:h]
+    misc.toimage(m,mode='L').save(patchbasename+format(ni-1,'03d')+'_'+format(nj-1,'03d')+'.png')
+    misc.toimage(png[w-size:w,h-size:h,:]).save(imbasename+format(ni-1,'03d')+'_'+format(nj-1,'03d')+'.png')
+
 def savepatch_train(png,mask,w,h,step,size,imbasename,patchbasename):
 
     ni = np.int32(np.floor((w- size)/step) +2)
@@ -170,7 +200,7 @@ def savepatch_train(png,mask,w,h,step,size,imbasename,patchbasename):
         name = format(i,'03d')+'_'+format(nj-1,'03d')+'.png'
         m = mask[i*step:i*step+size,h-size:h]
         if m.any():
-            misc.toimage(m,mode='l').save(patchbasename+name)
+            misc.toimage(m,mode='L').save(patchbasename+name)
         misc.toimage(png[i*step:i*step+size,h-size:h,:]).save(imbasename+format(i,'03d')+'_'+format(nj-1,'03d')+'.png')
 
 
@@ -178,7 +208,7 @@ def savepatch_train(png,mask,w,h,step,size,imbasename,patchbasename):
         name = format(ni-1,'03d')+'_'+format(j,'03d')+'.png'
         m = mask[w-size:w,j*step:j*step+size]
         if m.any():
-            misc.toimage(m,mode='l').save(patchbasename+name)
+            misc.toimage(m,mode='L').save(patchbasename+name)
         misc.toimage(png[w-size:w,j*step:j*step+size,:]).save(imbasename+format(ni-1,'03d')+'_'+format(j,'03d')+'.png')
     
     m= mask[w-size:w,h-size:h]

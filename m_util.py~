@@ -170,7 +170,7 @@ def savepatch_train(png,mask,w,h,step,size,imbasename,patchbasename):
         name = format(i,'03d')+'_'+format(nj-1,'03d')+'.png'
         m = mask[i*step:i*step+size,h-size:h]
         if m.any():
-            misc.toimage(m,mode='l').save(patchbasename+name)
+            misc.toimage(m,mode='L').save(patchbasename+name)
         misc.toimage(png[i*step:i*step+size,h-size:h,:]).save(imbasename+format(i,'03d')+'_'+format(nj-1,'03d')+'.png')
 
 
@@ -178,7 +178,7 @@ def savepatch_train(png,mask,w,h,step,size,imbasename,patchbasename):
         name = format(ni-1,'03d')+'_'+format(j,'03d')+'.png'
         m = mask[w-size:w,j*step:j*step+size]
         if m.any():
-            misc.toimage(m,mode='l').save(patchbasename+name)
+            misc.toimage(m,mode='L').save(patchbasename+name)
         misc.toimage(png[w-size:w,j*step:j*step+size,:]).save(imbasename+format(ni-1,'03d')+'_'+format(j,'03d')+'.png')
     
     m= mask[w-size:w,h-size:h]
@@ -200,21 +200,23 @@ def patches2png(patch_fold,imname,w,h,step,size):
         for j in range(0,nj-1):
             
             patch = misc.imread(patch_fold + '/' + imname + format(i,'03d')+'_'+format(j,'03d')+'.png',mode='L')
-            print i,j
-            print patch
+            patch[patch<50] = 0
             png[i*step:i*step+size,j*step:j*step+size]=  png[i*step:i*step+size,j*step:j*step+size]+patch 
             ws[i*step:i*step+size,j*step:j*step+size]=  ws[i*step:i*step+size,j*step:j*step+size]+ 1
     for i in range(0,ni-1):
         patch = misc.imread(patch_fold + '/' + imname + format(i,'03d')+'_'+format(nj-1,'03d')+'.png',mode='L')
+        patch[patch<50] = 0
         png[i*step:i*step+size,h-size:h] =  png[i*step:i*step+size,h-size:h]+ patch
         ws[i*step:i*step+size,h-size:h] =  ws[i*step:i*step+size,h-size:h]+ 1
 
     for j in range(0,nj-1):
         patch = misc.imread(patch_fold + '/' + imname + format(ni-1,'03d')+'_'+format(j,'03d')+'.png',mode='L')
+        patch[patch<50] = 0
         png[w-size:w,j*step:j*step+size]= png[w-size:w,j*step:j*step+size]+ patch
         ws [w-size:w,j*step:j*step+size]= ws [w-size:w,j*step:j*step+size]+ 1
    
     patch = misc.imread(patch_fold + '/' + imname + format(ni-1,'03d')+'_'+format(nj-1,'03d')+'.png',mode='L')
+    patch[patch<50] = 0
     png[w-size:w,h-size:h] = png[w-size:w,h-size:h]+ patch
     ws [w-size:w,h-size:h] = ws [w-size:w,h-size:h]+ 1
     png = np.divide(png,ws)

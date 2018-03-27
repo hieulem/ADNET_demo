@@ -32,7 +32,7 @@ for epoch in range(opt.epoch_count,opt.niter+opt.niter_decay+1):
         print('epoch:%d, i: %d'%(epoch,i))
         model.set_input(data)
         model.optimize_parameters()
-        if i% 100 ==0:
+        if i% 5 ==0:
             visualizer.display_current_results(model.get_current_visuals(), epoch, False)
     print('End of epoch %d / %d \t Time Taken: %d sec' %
                         (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))

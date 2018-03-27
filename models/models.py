@@ -6,6 +6,10 @@ def create_model(opt):
         assert(opt.dataset_mode == 'unaligned')
         from .cycle_gan_model import CycleGANModel
         model = CycleGANModel()
+
+    elif opt.model == 'single_unet_4c':
+        from .single_unet_4c import UnetModel
+        model = UnetModel()
     elif opt.model == 'single_unet':
         from .single_unet import UnetModel
         model = UnetModel()

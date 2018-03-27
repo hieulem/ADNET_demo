@@ -19,16 +19,19 @@ from vis import visAB,visABC
 opt = TestOptions().parse()
 #opt = argparse.ArgumentParser().parse_args()
 #opt.im_fold='/gpfs/projects/LynchGroup/Train_all/CROPPED/p1000/'
-opt.im_fold = '/nfs/bigbox/hieule/p1000/testing/CROZ/'
+opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/p300/'
+#opt.im_fold ='/nfs/bigbox/hieule/penguin_data/testing/CROZ/'
 opt.step = 128
 opt.size = 256
 opt.patch_fold_A = opt.im_fold+'PATCHES/'+str(opt.step)+'_'+ str(opt.size)+ '/A/'
 opt.patch_fold_B = opt.im_fold+'PATCHES/'+str(opt.step)+'_'+ str(opt.size)+'/B/'
-opt.name = 'no_bias'
-opt.patch_fold_res = opt.im_fold + 'PATCHES/res/' + opt.name + '/'
-opt.im_res = opt.im_fold + 'res/' + opt.name +'/'
-opt.checkpoints_dir = '/nfs/bigbox/hieule/p1000/'+ 'trainPATCHES/'+ 'checkpoints/'
-opt.which_epoch = 200
+opt.name = 'train_on_p300_2'
+opt.which_epoch = 10
+opt.patch_fold_res = opt.im_fold + 'PATCHES/res/' + opt.name+ '/'
+opt.im_res = opt.im_fold + 'res/' + opt.name +'e'+str(opt.which_epoch)+'/'
+#opt.checkpoints_dir = '/nfs/bigbox/hieule/p1000/'+ 'trainPATCHES/'+ 'checkpoints/'
+opt.checkpoints_dir = '/nfs/bigbox/hieule/penguin_data/checkpoints4c/'
+
 A_fold = opt.im_fold + 'A/'
 B_fold = opt.im_fold +  'B/'
 
@@ -39,27 +42,23 @@ sdmkdir(opt.patch_fold_res)
 sdmkdir(opt.im_res)
 imlist=[]
 imnamelist=[]
-print(opt)
-print A_fold
 opt.no_dropout = True
 model = create_model(opt)
 print(model)
 
 for root,_,fnames in sorted(os.walk(A_fold)):
     for fname in fnames:
-        if fname.endswith('.png'):
+        if fname.endswith('.png') and "M1BS" in fname:
             path = os.path.join(root,fname)
             path_mask = os.path.join(B_fold,fname)
             imlist.append((path,path_mask,fname))
             imnamelist.append(fname)
 for im_path,mask_path,imname in  imlist:
     png = misc.imread(im_path,mode='RGB')
-    #mask = misc.imread(mask_path,mode='L')
     w,h,z = png.shape
-    
-#    savepatch_test(png,w,h,opt.step,opt.size,opt.patch_fold_A+'/'+imname)
+    #savepatch_test(png,w,h,opt.step,opt.size,opt.patch_fold_A+'/'+imname)
     #savepatch_train(png,mask,w,h,opt.step,opt.size,opt.patch_fold_A+'/'+imname,opt.patch_fold_B+'/'+imname)
-'''
+
 for root,_,fnames in sorted(os.walk(opt.patch_fold_A)):
     for fname in fnames:
         if fname.endswith('png'):
@@ -72,10 +71,10 @@ for root,_,fnames in sorted(os.walk(opt.patch_fold_A)):
             imtensor = torch.unsqueeze(imtensor,0)
             temp = model.get_prediction(imtensor)['raw_out'][:,:,0]
             misc.toimage(temp,mode='L').save(os.path.join(opt.patch_fold_res,fname))
-'''
+
 for im_path,mask_path,imname in  imlist:
     png = misc.imread(im_path,mode='RGB')
     w,h,z = png.shape
     mask = patches2png(opt.patch_fold_res,imname,w,h,opt.step,opt.size)
     misc.toimage(mask.astype(np.uint8),mode='L').save(os.path.join(opt.im_res,imname))
-visABC(opt.im_fold,opt.name)
+visABC(opt.im_fold,opt.name+'e'+str(opt.which_epoch))
