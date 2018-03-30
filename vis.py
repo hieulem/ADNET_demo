@@ -4,8 +4,6 @@ from scipy import misc
 import os 
 from m_util import sdmkdir,to_rgb3b
 from sklearn import metrics
-import rasterio
-from rasterio import mask, features, warp
 
 def show_heatmap_on_image(img,mask):
     
@@ -39,11 +37,11 @@ def visdir(imdir,maskdir,visdir):
     imlist=[]
     imnamelist=[]
     print imdir
-    for root,_,fnames in sorted(os.walk(imdir)):
+    for root,_,fnames in sorted(os.walk(maskdir)):
         print root,fnames
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(root,fname)
+                pathA = os.path.join(imdir,fname)
                 pathB = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathB,fname))
                 imnamelist.append(fname)
@@ -59,10 +57,10 @@ def visdir2(imdir,GT,maskdir,visdir):
     sdmkdir(visdir)    
     imlist=[]
     imnamelist=[]
-    for root,_,fnames in sorted(os.walk(imdir)):
+    for root,_,fnames in sorted(os.walk(maskdir)):
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(root,fname)
+                pathA = os.path.join(imdir,fname)
                 pathGT = os.path.join(GT,fname)
                 pathmask = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathGT,pathmask,fname))
@@ -93,7 +91,7 @@ def visABC(root,name):
     vis = root + '/vis_all/'+name+'/'
     visdir2(A,B,res,vis)
 
-
+'''
 def visTIF(root,name):
 
     print('Visualizing:' + name)
@@ -123,4 +121,4 @@ def visTIF(root,name):
         outmeta.update({"count":outmeta.count+2})
         X = rasterio.read()
         print X.shape()
-        
+'''        

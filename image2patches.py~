@@ -35,7 +35,6 @@ opt.checkpoints_dir = '/nfs/bigbox/hieule/penguin_data/checkpoints4c/'
 A_fold = opt.im_fold + 'A/'
 B_fold = opt.im_fold +  'B/'
 
-opt.input_nc =3
 sdmkdir(opt.patch_fold_A)
 sdmkdir(opt.patch_fold_B)
 sdmkdir(opt.patch_fold_res)

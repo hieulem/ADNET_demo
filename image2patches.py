@@ -20,7 +20,7 @@ opt = TestOptions().parse()
 #opt = argparse.ArgumentParser().parse_args()
 #opt.im_fold='/gpfs/projects/LynchGroup/Train_all/CROPPED/p1000/'
 opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/p300/'
-#opt.im_fold ='/nfs/bigbox/hieule/penguin_data/testing/CROZ/'
+opt.im_fold ='/nfs/bigbox/hieule/penguin_data/Test/CROZ/CROPPED/p300/'
 opt.step = 128
 opt.size = 256
 opt.patch_fold_A = opt.im_fold+'PATCHES/'+str(opt.step)+'_'+ str(opt.size)+ '/A/'
@@ -30,7 +30,7 @@ opt.which_epoch = 10
 opt.patch_fold_res = opt.im_fold + 'PATCHES/res/' + opt.name+ '/'
 opt.im_res = opt.im_fold + 'res/' + opt.name +'e'+str(opt.which_epoch)+'/'
 #opt.checkpoints_dir = '/nfs/bigbox/hieule/p1000/'+ 'trainPATCHES/'+ 'checkpoints/'
-opt.checkpoints_dir = '/nfs/bigbox/hieule/penguin_data/checkpoints4c/'
+opt.checkpoints_dir = '/nfs/bigbox/hieule/penguin_data/checkpoints/'
 
 A_fold = opt.im_fold + 'A/'
 B_fold = opt.im_fold +  'B/'
