@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from descartes import PolygonPatch
 from osgeo import gdal,osr
-import pycrs
 
 def BoundingBoxShape(bb,padding=0):
     #bb = [minx,miny,maxx,maxy]

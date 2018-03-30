@@ -21,9 +21,13 @@ def to_rgb3b(im):
     # data
     return np.dstack([im.astype(np.uint8)] * 3).copy(order='C')
 def sdsaveim(savetif,name):
-
+    print savetif.shape
     if savetif.dtype == np.uint16:
-        savetif = (savetif.astype(np.float) / np.max(savetif)*255).astype(np.uint8) 
+        savetif = savetif.astype(np.float)
+        for i in range(0,savetif.shape[2]):
+            savetif[:,:,i] =  savetif[:,:,i] / np.max(savetif[:,:,i]) * 255
+        savetif = savetif.astype(np.uint8) 
+        print np.max(np.max(savetif,axis=0),axis=0)
     if savetif.shape[2] == 3:
         Image.fromarray(savetif.astype(np.uint8)).save(name)
     if savetif.shape[2] == 1:

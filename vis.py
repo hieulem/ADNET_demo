@@ -4,6 +4,8 @@ from scipy import misc
 import os 
 from m_util import sdmkdir,to_rgb3b
 from sklearn import metrics
+import rasterio
+from rasterio import mask, features, warp
 
 def show_heatmap_on_image(img,mask):
     
@@ -37,11 +39,11 @@ def visdir(imdir,maskdir,visdir):
     imlist=[]
     imnamelist=[]
     print imdir
-    for root,_,fnames in sorted(os.walk(maskdir)):
+    for root,_,fnames in sorted(os.walk(imdir)):
         print root,fnames
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(imdir,fname)
+                pathA = os.path.join(root,fname)
                 pathB = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathB,fname))
                 imnamelist.append(fname)
@@ -57,10 +59,10 @@ def visdir2(imdir,GT,maskdir,visdir):
     sdmkdir(visdir)    
     imlist=[]
     imnamelist=[]
-    for root,_,fnames in sorted(os.walk(maskdir)):
+    for root,_,fnames in sorted(os.walk(imdir)):
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(imdir,fname)
+                pathA = os.path.join(root,fname)
                 pathGT = os.path.join(GT,fname)
                 pathmask = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathGT,pathmask,fname))
@@ -91,7 +93,7 @@ def visABC(root,name):
     vis = root + '/vis_all/'+name+'/'
     visdir2(A,B,res,vis)
 
-'''
+
 def visTIF(root,name):
 
     print('Visualizing:' + name)
@@ -104,21 +106,30 @@ def visTIF(root,name):
 
     imlist=[]
     imnamelist=[]
-    for root,_,fnames in sorted(os.walk(tif)):
+    for root,_,fnames in sorted(os.walk(res)):
         for fname in fnames:
             if fname.endswith('.png'):
+                fname = fname[:-4]
                 pathA = os.path.join(tif,fname)
                 pathGT = os.path.join(B,fname)
                 pathmask = os.path.join(res,fname)
-                imlist.append((pathA,pathGT,pathmask,fname))
+                imlist.append((pathA,pathGT,pathmask,fname[:-4]))
                 imnamelist.append(fname)
     print imnamelist
     for pathA,pathB,pathmask,fname in imlist:
-        GT = misc.imread(pathB)
-        mask = misc.imread(pathmask)
-        tifim = rasterio.open(pathA)
+        GT = misc.imread(pathB+'.png')
+        mask = misc.imread(pathmask+'.png')
+        tifim = rasterio.open(pathA+'.tif')
         outmeta = tifim.meta.copy()
-        outmeta.update({"count":outmeta.count+2})
-        X = rasterio.read()
-        print X.shape()
-'''        
+        outmeta.update({"count":outmeta["count"]+2})
+        X = tifim.read()
+        print X.shape
+        print mask.shape
+        mask = np.expand_dims(mask,axis=0)
+        GT = np.expand_dims(GT,axis=0)
+        print mask.shape    
+        X = np.concatenate((X,GT,mask),axis =0)
+        print X.shape
+        with rasterio.open(tifres+fname+'.tif',"w",**outmeta) as dest:
+            dest.write(X) 
+
