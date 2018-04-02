@@ -12,7 +12,7 @@ def show_heatmap_on_image(img,mask):
     #mask = np.float32(mask)/np.max(mask)
     #mask[mask<0] = 0
 
-    heatmap = cv2.applyColorMap(mask, 8)  #Jet is 2, winter is 3 8 = cool
+    heatmap = cv2.applyColorMap(mask, 2)  #Jet is 2, winter is 3 8 = cool
     heatmap = np.float32(heatmap) / 255
     img = np.float32(img)/255
     cam = heatmap* 0.5+ np.float32(img)
@@ -39,11 +39,11 @@ def visdir(imdir,maskdir,visdir):
     imlist=[]
     imnamelist=[]
     print imdir
-    for root,_,fnames in sorted(os.walk(imdir)):
+    for root,_,fnames in sorted(os.walk(maskdir)):
         print root,fnames
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(root,fname)
+                pathA = os.path.join(imdir,fname)
                 pathB = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathB,fname))
                 imnamelist.append(fname)
@@ -54,22 +54,22 @@ def visdir(imdir,maskdir,visdir):
         B = misc.imread(pathB)
         vim = show_heatmap_on_image(A,B)
         #vim = show_plainmask_on_image(A,B)
-        cv2.imwrite(os.path.join(visdir,fname),np.append(A,vim,axis=1))
+        misc.imsave(os.path.join(visdir,fname),np.append(A,vim,axis=1))
 def visdir2(imdir,GT,maskdir,visdir):
     sdmkdir(visdir)    
     imlist=[]
     imnamelist=[]
-    for root,_,fnames in sorted(os.walk(imdir)):
+    for root,_,fnames in sorted(os.walk(maskdir)):
         for fname in fnames:
             if fname.endswith('.png'):
-                pathA = os.path.join(root,fname)
+                pathA = os.path.join(imdir,fname)
                 pathGT = os.path.join(GT,fname)
                 pathmask = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathGT,pathmask,fname))
                 imnamelist.append(fname)
     print imnamelist
     for pathA,pathB,pathmask,fname in imlist:
-        A = misc.imread(pathA)
+        A = misc.imread(pathA).astype(np.uint8)
         GT = misc.imread(pathB)
         mask = misc.imread(pathmask)
         fpr, tpr, thresholds = metrics.roc_curve(GT.ravel(), mask.ravel(), pos_label=255)
@@ -78,7 +78,8 @@ def visdir2(imdir,GT,maskdir,visdir):
         #maskv = show_plainmask_on_image(A,mask)
         maskv = show_heatmap_on_image(A,mask)
         maskv = draw(maskv,auc)
-        cv2.imwrite(os.path.join(visdir,fname),np.hstack((A,maskv,GTv)))#np.append(np.append(A,GTv,axis=1),maskv,axis=1))
+        misc.imsave(os.path.join(visdir,fname),np.hstack((A,maskv,GTv)))#np.append(np.append(A,GTv,axis=1),maskv,axis=1))
+        #misc.imsave(os.path.join(visdir,fname),A)#np.append(np.append(A,GTv,axis=1),maskv,axis=1))
 def visAB(root,name):
     
     A = root + '/A/'

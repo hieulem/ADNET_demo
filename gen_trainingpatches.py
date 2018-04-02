@@ -6,17 +6,14 @@ from options.train_options import TrainOptions
 from options.test_options import TestOptions
 import time
 from data.data_loader import CreateDataLoader
-import matplotlib
-matplotlib.use('agg')
 import torch
 import os.path
 import argparse
 from scipy import misc
-import matplotlib.pyplot as plt
 from m_util import sdmkdir,savepatch_test,savepatch_train,patches2png
 from vis import visAB,visABC
 opt = argparse.ArgumentParser().parse_args()
-opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/p300_3/'#+'/nfs/bigbox/hieule/p1000/testing/CROZ/'
+opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/p2000/'#+'/nfs/bigbox/hieule/p1000/testing/CROZ/'
 opt.step = 64
 opt.size = 386
 opt.patch_fold_A = opt.im_fold+'PATCHES/'+str(opt.step)+'_'+ str(opt.size)+ '/A/'
