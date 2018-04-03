@@ -33,7 +33,7 @@ class PngDataset(BaseDataset):
         self.nim = len(self.imname)
 
     def __len__(self):
-        return 50000
+        return 30000
         #return self.nim*20
     def name(self):
         return 'PNGDATASET'
@@ -68,7 +68,7 @@ class PngDataset(BaseDataset):
                 B_img = np.zeros((A_img.shape[0],A_img.shape[1]))
         
         C_img = np.copy(B_img).astype(np.uint8)
-        C_img = cv2.dilate(C_img, np.ones((10,10)))
+        C_img = cv2.dilate(C_img, np.ones((30,30)))
         C_img[C_img>0] = 255
         A_img = np.transpose(A_img,(2,0,1))
         B_img = np.expand_dims(B_img, axis=0)

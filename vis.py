@@ -47,9 +47,7 @@ def visdir(imdir,maskdir,visdir):
                 pathB = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathB,fname))
                 imnamelist.append(fname)
-    print(imlist)
     for pathA,pathB,fname in imlist:
-        print fname
         A = misc.imread(pathA)
         B = misc.imread(pathB)
         vim = show_heatmap_on_image(A,B)
@@ -67,7 +65,6 @@ def visdir2(imdir,GT,maskdir,visdir):
                 pathmask = os.path.join(maskdir,fname)
                 imlist.append((pathA,pathGT,pathmask,fname))
                 imnamelist.append(fname)
-    print imnamelist
     for pathA,pathB,pathmask,fname in imlist:
         A = misc.imread(pathA).astype(np.uint8)
         GT = misc.imread(pathB)
@@ -124,13 +121,9 @@ def visTIF(root,name):
         outmeta = tifim.meta.copy()
         outmeta.update({"count":outmeta["count"]+2})
         X = tifim.read()
-        print X.shape
-        print mask.shape
         mask = np.expand_dims(mask,axis=0)
         GT = np.expand_dims(GT,axis=0)
-        print mask.shape    
         X = np.concatenate((X,GT,mask),axis =0)
-        print X.shape
         with rasterio.open(tifres+fname+'.tif',"w",**outmeta) as dest:
             dest.write(X) 
 

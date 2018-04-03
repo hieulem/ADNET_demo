@@ -20,6 +20,7 @@ class UnetModel(BaseModel):
         self.netG = networks.define_G(opt.input_nc, 1, 64,
                                       'unet_256', opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
         self.criterionL1 = torch.nn.L1Loss()        
+        self.criterionMSE= torch.nn.MSELoss()        
         if self.isTrain:
             self.old_lr = opt.lr
             # define loss functions
@@ -56,6 +57,7 @@ class UnetModel(BaseModel):
 
     def backward_G(self):
         self.loss_G = self.criterionL1(self.output, self.GT) 
+        #self.loss_G = self.criterionMSE(self.output, self.GT) 
         self.loss_G.backward()
 
     def optimize_parameters(self):
@@ -66,7 +68,7 @@ class UnetModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G.data[0]),('X',0)
+        return OrderedDict([('G_Loss', self.loss_G.data[0]),('X',0)
                             ])
     def get_prediction(self,input_A):
         if len(self.gpu_ids) > 0:

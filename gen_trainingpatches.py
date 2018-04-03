@@ -12,8 +12,10 @@ import argparse
 from scipy import misc
 from m_util import sdmkdir,savepatch_test,savepatch_train,patches2png
 from vis import visAB,visABC
-opt = argparse.ArgumentParser().parse_args()
-opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/p2000/'#+'/nfs/bigbox/hieule/p1000/testing/CROZ/'
+parse = argparse.ArgumentParser()
+parse.add_argument('--dataset')
+opt = parse.parse_args()
+opt.im_fold = '/nfs/bigbox/hieule/penguin_data/CROPPED/' + opt.dataset +'/'#+'/nfs/bigbox/hieule/p1000/testing/CROZ/'
 opt.step = 64
 opt.size = 386
 opt.patch_fold_A = opt.im_fold+'PATCHES/'+str(opt.step)+'_'+ str(opt.size)+ '/A/'

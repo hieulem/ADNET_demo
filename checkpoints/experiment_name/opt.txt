@@ -1,6 +1,6 @@
 ------------ Options -------------
 aspect_ratio: 1.0
-batchSize: 55
+batchSize: 64
 biased_sampling: -1
 checkpoints_dir: ./checkpoints
 dataroot: None
