@@ -14,11 +14,11 @@ def weights_init_normal(m):
     classname = m.__class__.__name__
     # print(classname)
     if classname.find('Conv') != -1:
-        init.normal(m.weight.data, 0.0, 0.02)
+        init.uniform(m.weight.data, 0.0, 0.02)
     elif classname.find('Linear') != -1:
-        init.normal(m.weight.data, 0.0, 0.02)
+        init.uniform(m.weight.data, 0.0, 0.02)
     elif classname.find('BatchNorm2d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
+        init.uniform(m.weight.data, 1.0, 0.02)
         init.constant(m.bias.data, 0.0)
 
 
@@ -26,11 +26,11 @@ def weights_init_xavier(m):
     classname = m.__class__.__name__
     # print(classname)
     if classname.find('Conv') != -1:
-        init.xavier_normal(m.weight.data, gain=0.02)
+        init.xavier_normal(m.weight.data, gain=1)
     elif classname.find('Linear') != -1:
-        init.xavier_normal(m.weight.data, gain=0.02)
+        init.xavier_normal(m.weight.data, gain=1)
     elif classname.find('BatchNorm2d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
+        init.uniform(m.weight.data, 1.0, 0.02)
         init.constant(m.bias.data, 0.0)
 
 
@@ -42,7 +42,7 @@ def weights_init_kaiming(m):
     elif classname.find('Linear') != -1:
         init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
     elif classname.find('BatchNorm2d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
+        init.uniform(m.weight.data, 1.0, 0.02)
         init.constant(m.bias.data, 0.0)
 
 
@@ -54,7 +54,7 @@ def weights_init_orthogonal(m):
     elif classname.find('Linear') != -1:
         init.orthogonal(m.weight.data, gain=1)
     elif classname.find('BatchNorm2d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
+        init.uniform(m.weight.data, 1.0, 0.02)
         init.constant(m.bias.data, 0.0)
 
 
@@ -76,8 +76,8 @@ def get_norm_layer(norm_type='instance'):
     if norm_type == 'batch':
         norm_layer = functools.partial(nn.BatchNorm2d, affine=True)
     elif norm_type == 'instance':
-        norm_layer = functools.partial(nn.InstanceNorm2d, affine=False)
-    elif norm_type == 'none':
+        norm_layer = functools.partial(nn.InstanceNorm2d, affine=False,track_running_stats=True)
+    elif layer_type == 'none':
         norm_layer = None
     else:
         raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
@@ -118,13 +118,13 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % which_model_netG)
     if len(gpu_ids) > 0:
-        netG.cuda(gpu_ids[0])
+        netG.cuda(device=gpu_ids[0])
     init_weights(netG, init_type=init_type)
     return netG
 
 
 def define_D(input_nc, ndf, which_model_netD,
-             n_layers_D=3, norm='batch', use_sigmoid=False, init_type='normal', gpu_ids=[]):
+             n_layers_D=5, norm='batch', use_sigmoid=False, init_type='normal', gpu_ids=[]):
     netD = None
     use_gpu = len(gpu_ids) > 0
     norm_layer = get_norm_layer(norm_type=norm)
@@ -135,13 +135,11 @@ def define_D(input_nc, ndf, which_model_netD,
         netD = NLayerDiscriminator(input_nc, ndf, n_layers=3, norm_layer=norm_layer, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
     elif which_model_netD == 'n_layers':
         netD = NLayerDiscriminator(input_nc, ndf, n_layers_D, norm_layer=norm_layer, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
-    elif which_model_netD == 'pixel':
-        netD = PixelDiscriminator(input_nc, ndf, norm_layer=norm_layer, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
     else:
         raise NotImplementedError('Discriminator model name [%s] is not recognized' %
                                   which_model_netD)
     if use_gpu:
-        netD.cuda(gpu_ids[0])
+        netD.cuda(device=gpu_ids[0])
     init_weights(netD, init_type=init_type)
     return netD
 
@@ -359,6 +357,8 @@ class UnetSkipConnectionBlock(nn.Module):
             upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
+          
+
             down = [downrelu, downconv]
             up = [uprelu, upconv, upnorm]
             model = down + up
@@ -380,7 +380,8 @@ class UnetSkipConnectionBlock(nn.Module):
         if self.outermost:
             return self.model(x)
         else:
-            return torch.cat([x, self.model(x)], 1)
+            a = self.model(x)
+            return torch.cat([x, a], 1)
 
 
 # Defines the PatchGAN discriminator with the specified arguments.
@@ -433,32 +434,3 @@ class NLayerDiscriminator(nn.Module):
             return nn.parallel.data_parallel(self.model, input, self.gpu_ids)
         else:
             return self.model(input)
-
-class PixelDiscriminator(nn.Module):
-    def __init__(self, input_nc, ndf=64, norm_layer=nn.BatchNorm2d, use_sigmoid=False, gpu_ids=[]):
-        super(PixelDiscriminator, self).__init__()
-        self.gpu_ids = gpu_ids
-        if type(norm_layer) == functools.partial:
-            use_bias = norm_layer.func == nn.InstanceNorm2d
-        else:
-            use_bias = norm_layer == nn.InstanceNorm2d
-            
-        self.net = [
-            nn.Conv2d(input_nc, ndf, kernel_size=1, stride=1, padding=0),
-            nn.LeakyReLU(0.2, True),
-            nn.Conv2d(ndf, ndf * 2, kernel_size=1, stride=1, padding=0, bias=use_bias),
-            norm_layer(ndf * 2),
-            nn.LeakyReLU(0.2, True),
-            nn.Conv2d(ndf * 2, 1, kernel_size=1, stride=1, padding=0, bias=use_bias)]
-
-        if use_sigmoid:
-            self.net.append(nn.Sigmoid())
-
-        self.net = nn.Sequential(*self.net)
-
-    def forward(self, input):
-        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
-            return nn.parallel.data_parallel(self.net, input, self.gpu_ids)
-        else:
-            return self.net(input)
-

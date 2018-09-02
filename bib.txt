@@ -1,0 +1,6 @@
+@inproceedings{m_Le-etal-ECCV18, 
+Author = {Hieu Le and Tomas F. Yago Vicente and Vu Nguyen and Minh Hoai and Dimitris Samaras}, 
+Booktitle = {Proceedings of European Conference on Computer Vision}, 
+Title = {{A+D Net}: Training a Shadow Detector with Adversarial Shadow Attenuation}, 
+Year = {2018}} 
+

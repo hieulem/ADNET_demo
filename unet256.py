@@ -15,7 +15,6 @@ class Unet256Model(BaseModel):
         norm_layer = networks.get_norm_layer('instance')
         self.net =networks.UnetGenerator(3,1,8,64,use_dropout=False,norm_layer = norm_layer,gpu_ids = gpu_ids)
         if load_model is not None:
-            print "loading model"
             self.net.load_state_dict(torch.load(load_model))
         self.net.cuda(0)
     def print_net(self):
