@@ -1,9 +1,4 @@
 
-<img src='Test/lssd1005.jpg' width=200 height = 250> <img src='out/lssd1005.jpg'  width=200 height =250> 
-<br><br><br>
-
-
-
 # A+D-Net: Shadow Detection with Adversarial Shadow Attenuation
 
 
