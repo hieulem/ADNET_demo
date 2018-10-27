@@ -1,9 +1,6 @@
 
-<img src='Test/lssd100.jpg' align="right" width=384 height = 300> 
-<img src='out/lssd100.jpg' align="right" width=384 height =300> 
+<img src='Test/lssd1005.jpg' width=200 height = 250> <img src='out/lssd1005.jpg'  width=200 height =250> 
 <br><br><br>
-
-
 
 
 
@@ -12,10 +9,17 @@
 
 This is a demo of [ADNet for shadow detection](https://arxiv.org/abs/1712.01361). The code is written by [Hieu Le](https://lmhieu612.github.io). A large amount of code is borrowed from the pix2pix implementation of Jan-Yan-Zhu and Teasung Park. 
 
-To run the code, please download our pre-trained model at: https://drive.google.com/file/d/18ro6xdH4usRtw8XC_rVan_FCiKMDV7va/view?usp=sharing
 
+## Citation
 If you use this code for your research, please cite:
 
+```
 A+D-Net: Shadow Detection with Adversarial Shadow Attenuation
 Hieu Le, Tomas F. Yago Vicente, Vu Nguyen, Minh Hoai, Dimitris Samaras
-In arxiv, 2017
+
+@inproceedings{m_Le-etal-ECCV18, 
+Author = {Hieu Le and Tomas F. Yago Vicente and Vu Nguyen and Minh Hoai and Dimitris Samaras}, 
+Booktitle = {Proceedings of European Conference on Computer Vision}, 
+Title = {{A+D Net}: Training a Shadow Detector with Adversarial Shadow Attenuation}, 
+Year = {2018}} 
+```
