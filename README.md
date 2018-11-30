@@ -2,7 +2,7 @@
 # A+D-Net: Shadow Detection with Adversarial Shadow Attenuation
 
 
-This is a demo of [ADNet for shadow detection](https://arxiv.org/abs/1712.01361). The code is written by [Hieu Le](https://lmhieu612.github.io). A large amount of code is borrowed from the pix2pix implementation of Jan-Yan-Zhu and Teasung Park. 
+This is a demo of ECCV18 [ADNet for shadow detection](https://arxiv.org/abs/1712.01361). The code is written by [Hieu Le](https://lmhieu612.github.io). A large amount of code is borrowed from the pix2pix implementation of Jan-Yan-Zhu and Teasung Park. 
 
 Download the model at:
 
